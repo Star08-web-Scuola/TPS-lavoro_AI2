@@ -113,7 +113,7 @@ export default function RootLayout({
 
               <footer className="border-t py-4">
                 <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-                  © {new Date().getFullYear()} GreenPath Analytics. {t('Infrastructure for Sustainable Mobility')}
+                  © {new Date().getFullYear()} GreenPath Analytics. {('Infrastructure for Sustainable Mobility')}
                 </div>
               </footer>
             </div>
