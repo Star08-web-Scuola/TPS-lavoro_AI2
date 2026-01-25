@@ -167,7 +167,7 @@ On-Time Delivery Rate: ${reportData.summary.onTimeDeliveryRate}
 Total CO₂ Savings: ${reportData.summary.totalCO2Savings}
 Road Transport Equivalent CO₂: ${reportData.summary.roadEquivalentCO2}
 CO₂ per Shipment: ${reportData.summary.co2PerShipment}
-Delivery Success Rate: ${reportData.summary.deliverySuccessRate}
+Delivery Success Rate: ${reportData.summary.deliveryShipments}
 
 MODAL SHIFT IMPACT
 ------------------
