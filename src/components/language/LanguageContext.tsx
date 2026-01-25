@@ -153,7 +153,7 @@ const translations = {
     'Generating Report': 'Generating Report',
     'generateReport': 'Generate Report',
     'Total Shipments': 'Total Shipments',
-    'Delivered Shipments': 'Delivered Shipments',
+    'Delivered Shipments': 'Delivered Shiped Shipments',
     'Delivery Success Rate': 'Delivery Success Rate',
     'Road Equivalent CO₂': 'Road Equivalent CO₂',
     'CO₂ per Shipment': 'CO₂ per Shipment',
@@ -198,7 +198,14 @@ const translations = {
     'Welcome back!': 'Welcome back!',
     'You have been signed out': 'You have been signed out',
     'Sign up successful! Please check your email for verification.': 'Sign up successful! Please check your email for verification.',
-    'Shipment data updated in real-time': 'Shipment data updated in real-time'
+    'Shipment data updated in real-time': 'Shipment data updated in real-time',
+
+    // 404 Page
+    'Page Not Found': 'Page Not Found',
+    'Our warehouse cat is searching everywhere but cannot find this page.': 'Our warehouse cat is searching everywhere but cannot find this page.',
+    'Return Home': 'Return Home',
+    'Go to Dashboard': 'Go to Dashboard',
+    'Our warehouse cat will keep searching...': 'Our warehouse cat will keep searching...'
   },
   it: {
     // Common
@@ -385,7 +392,14 @@ const translations = {
     'Welcome back!': 'Bentornato!',
     'You have been signed out': 'Sei stato disconnesso',
     'Sign up successful! Please check your email for verification.': 'Registrazione avvenuta con successo! Controlla la tua email per la verifica.',
-    'Shipment data updated in real-time': 'Dati spedizione aggiornati in tempo reale'
+    'Shipment data updated in real-time': 'Dati spedizione aggiornati in tempo reale',
+
+    // 404 Page
+    'Page Not Found': 'Pagina Non Trovata',
+    'Our warehouse cat is searching everywhere but cannot find this page.': 'Il nostro gatto di magazzino sta cercando ovunque ma non riesce a trovare questa pagina.',
+    'Return Home': 'Torna alla Home',
+    'Go to Dashboard': 'Vai alla Dashboard',
+    'Our warehouse cat will keep searching...': 'Il nostro gatto di magazzino continuerà a cercare...'
   }
 };
 
