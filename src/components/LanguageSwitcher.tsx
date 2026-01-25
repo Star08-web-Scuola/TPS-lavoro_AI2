@@ -10,8 +10,11 @@ const LanguageSwitcher = () => {
   const { language, setLanguage, t } = useLanguage();
 
   const handleLanguageChange = (lang: 'en' | 'it') => {
+    console.log(`Changing language from ${language} to ${lang}`);
     setLanguage(lang);
   };
+
+  console.log(`LanguageSwitcher rendered with language: ${language}`);
 
   return (
     <DropdownMenu>

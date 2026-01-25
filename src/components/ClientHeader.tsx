@@ -12,6 +12,8 @@ export function ClientHeader() {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
 
+  console.log(`ClientHeader rendered, current language translations available`);
+
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">

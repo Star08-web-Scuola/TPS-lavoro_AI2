@@ -368,7 +368,14 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   }, [language]);
 
   const t = (key: string): string => {
-    return translations[language][key] || key;
+    // Debug: log the current language and key
+    console.log(`Translating key: ${key} in language: ${language}`);
+    const translation = translations[language][key];
+    if (!translation) {
+      console.warn(`Missing translation for key: ${key} in language: ${language}`);
+      return key; // Fallback to key if translation not found
+    }
+    return translation;
   };
 
   return (
