@@ -65,9 +65,9 @@ const IntermodalDashboard = () => {
         setShipments(prev => {
           const existingIndex = prev.findIndex(s => s.id === payload.new.id);
           if (existingIndex >= 0) {
-            return prev.map(s => s.id === payload.new.id ? payload.new : s);
+            return prev.map(s => s.id === payload.new.id ? payload.new as Shipment : s);
           } else {
-            return [...prev, payload.new];
+            return [...prev, payload.new as Shipment];
           }
         });
         toast.info(t('Shipment data updated in real-time'));
