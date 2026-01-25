@@ -8,13 +8,21 @@ import { Languages, Check } from 'lucide-react';
 
 const LanguageSwitcher = () => {
   const { language, setLanguage, t } = useLanguage();
+  const [mounted, setMounted] = React.useState(false);
+
+  // This ensures we only render after the language is loaded on the client
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLanguageChange = (lang: 'en' | 'it') => {
-    console.log(`Changing language from ${language} to ${lang}`);
     setLanguage(lang);
   };
 
-  console.log(`LanguageSwitcher rendered with language: ${language}`);
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
