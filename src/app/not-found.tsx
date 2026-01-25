@@ -30,18 +30,34 @@ export default function NotFound() {
                 <div className="bg-amber-200 border border-amber-400 rounded-sm"></div>
               </div>
 
-              {/* Cat searching */}
+              {/* Improved Cat - now looks more like a cat */}
               <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                <div className="w-12 h-8 bg-orange-400 rounded-full relative">
-                  <div className="absolute -top-2 left-2 w-3 h-3 bg-orange-400 rounded-full"></div>
-                  <div className="absolute -top-2 right-2 w-3 h-3 bg-orange-400 rounded-full"></div>
-                  <div className="absolute top-1 left-1 w-1 h-1 bg-black rounded-full"></div>
-                  <div className="absolute top-1 right-1 w-1 h-1 bg-black rounded-full"></div>
-                  <div className="absolute -top-1 left-3 w-1 h-2 bg-black"></div>
-                  <div className="absolute -top-1 right-3 w-1 h-2 bg-black"></div>
-                  <div className="absolute bottom-0 left-1 w-6 h-2 bg-orange-400 rounded-b-full"></div>
-                  <div className="absolute bottom-0 right-1 w-6 h-2 bg-orange-400 rounded-b-full"></div>
-                  <div className="absolute -right-4 top-2 w-6 h-1 bg-orange-300 transform rotate-45"></div>
+                <div className="relative">
+                  {/* Cat head */}
+                  <div className="w-12 h-10 bg-orange-400 rounded-full relative">
+                    {/* Ears */}
+                    <div className="absolute -top-2 left-1 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-orange-400"></div>
+                    <div className="absolute -top-2 right-1 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-orange-400"></div>
+
+                    {/* Eyes */}
+                    <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-black rounded-full"></div>
+                    <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-black rounded-full"></div>
+
+                    {/* Nose */}
+                    <div className="absolute top-3.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-pink-400 rounded-full"></div>
+
+                    {/* Whiskers */}
+                    <div className="absolute top-4 left-1 w-4 h-0.5 bg-gray-600 transform -rotate-12"></div>
+                    <div className="absolute top-4 left-1 w-4 h-0.5 bg-gray-600 transform rotate-12"></div>
+                    <div className="absolute top-4 right-1 w-4 h-0.5 bg-gray-600 transform -rotate-12"></div>
+                    <div className="absolute top-4 right-1 w-4 h-0.5 bg-gray-600 transform rotate-12"></div>
+                  </div>
+
+                  {/* Cat body */}
+                  <div className="w-14 h-8 bg-orange-400 rounded-b-full mx-auto relative">
+                    {/* Tail */}
+                    <div className="absolute -right-4 top-2 w-6 h-1 bg-orange-400 transform rotate-45 rounded-sm"></div>
+                  </div>
                 </div>
               </div>
 
