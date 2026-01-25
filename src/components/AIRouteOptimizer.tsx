@@ -10,6 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Shipment, Hub, RouteOptimization } from '@/types/database';
 import { MapPin, Route, BatteryCharging, Leaf, Clock, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/components/language/LanguageContext';
+import RouteMap from '@/components/RouteMap';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const AIRouteOptimizer = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -21,6 +24,8 @@ const AIRouteOptimizer = () => {
   const [loading, setLoading] = useState(false);
   const [optimizedRoute, setOptimizedRoute] = useState<RouteOptimization | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,20 +52,20 @@ const AIRouteOptimizer = () => {
 
       } catch (err) {
         console.error('Error fetching route optimizer data:', err);
-        setError('Failed to load data. Please refresh the page.');
-        toast.error('Failed to load route optimizer data');
+        setError(t('Failed to load data. Please refresh the page.'));
+        toast.error(t('Failed to load route optimizer data'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [t]);
 
   const handleOptimizeRoute = async () => {
     if (!selectedShipment || !originHub || !destinationHub) {
-      setError('Please select shipment, origin hub, and destination hub');
-      toast.error('Please select shipment, origin hub, and destination hub');
+      setError(t('Please select shipment, origin hub, and destination hub'));
+      toast.error(t('Please select shipment, origin hub, and destination hub'));
       return;
     }
 
@@ -74,7 +79,7 @@ const AIRouteOptimizer = () => {
       const destination = hubs.find(h => h.id === destinationHub);
 
       if (!shipment || !origin || !destination) {
-        throw new Error('Invalid selection');
+        throw new Error(t('Invalid selection'));
       }
 
       // Calculate distance (simplified - in real app use proper distance calculation)
@@ -121,12 +126,12 @@ const AIRouteOptimizer = () => {
       if (saveError) throw saveError;
 
       setOptimizedRoute(data);
-      toast.success('Route optimized successfully!');
+      toast.success(t('Route optimized successfully!'));
 
     } catch (err) {
       console.error('Error optimizing route:', err);
-      setError('Failed to optimize route. Please try again.');
-      toast.error('Failed to optimize route');
+      setError(t('Failed to optimize route. Please try again.'));
+      toast.error(t('Failed to optimize route'));
     } finally {
       setLoading(false);
     }
@@ -153,30 +158,30 @@ const AIRouteOptimizer = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
         <Route className="h-8 w-8" />
-        AI Route Optimizer
+        {t('aiRouteOptimizer')}
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Route Optimization</CardTitle>
+              <CardTitle>{t('routeOptimization')}</CardTitle>
               <CardDescription>
-                Calculate the most energy-efficient routes for electric delivery vehicles
+                {t('Calculate the most energy-efficient routes for electric delivery vehicles')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="shipment">Shipment</Label>
+                    <Label htmlFor="shipment">{t('selectShipment')}</Label>
                     <Select
                       value={selectedShipment}
                       onValueChange={setSelectedShipment}
                       disabled={loading}
                     >
                       <SelectTrigger id="shipment">
-                        <SelectValue placeholder="Select shipment" />
+                        <SelectValue placeholder={t('selectShipment')} />
                       </SelectTrigger>
                       <SelectContent>
                         {shipments.map((shipment) => (
@@ -189,14 +194,14 @@ const AIRouteOptimizer = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="origin-hub">Origin Hub</Label>
+                    <Label htmlFor="origin-hub">{t('selectOriginHub')}</Label>
                     <Select
                       value={originHub}
                       onValueChange={setOriginHub}
                       disabled={loading}
                     >
                       <SelectTrigger id="origin-hub">
-                        <SelectValue placeholder="Select origin hub" />
+                        <SelectValue placeholder={t('selectOriginHub')} />
                       </SelectTrigger>
                       <SelectContent>
                         {hubs.map((hub) => (
@@ -209,14 +214,14 @@ const AIRouteOptimizer = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="destination-hub">Destination Hub</Label>
+                    <Label htmlFor="destination-hub">{t('selectDestinationHub')}</Label>
                     <Select
                       value={destinationHub}
                       onValueChange={setDestinationHub}
                       disabled={loading}
                     >
                       <SelectTrigger id="destination-hub">
-                        <SelectValue placeholder="Select destination hub" />
+                        <SelectValue placeholder={t('selectDestinationHub')} />
                       </SelectTrigger>
                       <SelectContent>
                         {hubs.map((hub) => (
@@ -229,18 +234,18 @@ const AIRouteOptimizer = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle-type">Vehicle Type</Label>
+                    <Label htmlFor="vehicle-type">{t('selectVehicleType')}</Label>
                     <Select
                       value={vehicleType}
                       onValueChange={(value) => setVehicleType(value as 'electric_van' | 'cargo_bike')}
                       disabled={loading}
                     >
                       <SelectTrigger id="vehicle-type">
-                        <SelectValue placeholder="Select vehicle type" />
+                        <SelectValue placeholder={t('selectVehicleType')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="electric_van">Electric Van</SelectItem>
-                        <SelectItem value="cargo_bike">Cargo Bike</SelectItem>
+                        <SelectItem value="electric_van">{t('Electric Van')}</SelectItem>
+                        <SelectItem value="cargo_bike">{t('Cargo Bike')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -254,12 +259,12 @@ const AIRouteOptimizer = () => {
                   {loading ? (
                     <>
                       <span className="animate-spin mr-2">🔄</span>
-                      Optimizing...
+                      {t('loading')}
                     </>
                   ) : (
                     <>
                       <Route className="mr-2 h-4 w-4" />
-                      Optimize Route
+                      {t('optimizeRoute')}
                     </>
                   )}
                 </Button>
@@ -278,16 +283,16 @@ const AIRouteOptimizer = () => {
         <div className="lg:col-span-1">
           <Card>
             <CardHeader>
-              <CardTitle>Optimization Factors</CardTitle>
+              <CardTitle>{t('Optimization Factors')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <MapPin className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
-                    <h4 className="font-medium">Traffic Conditions</h4>
+                    <h4 className="font-medium">{t('Traffic Conditions')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Real-time traffic data integration to avoid congestion
+                      {t('Real-time traffic data integration to avoid congestion')}
                     </p>
                   </div>
                 </div>
@@ -295,9 +300,9 @@ const AIRouteOptimizer = () => {
                 <div className="flex items-start gap-3">
                   <BatteryCharging className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
-                    <h4 className="font-medium">Charging Infrastructure</h4>
+                    <h4 className="font-medium">{t('Charging Infrastructure')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Optimal charging stop planning based on vehicle range
+                      {t('Optimal charging stop planning based on vehicle range')}
                     </p>
                   </div>
                 </div>
@@ -305,9 +310,9 @@ const AIRouteOptimizer = () => {
                 <div className="flex items-start gap-3">
                   <Leaf className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
-                    <h4 className="font-medium">Low Emission Zones</h4>
+                    <h4 className="font-medium">{t('Low Emission Zones')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Compliance with ZTL regulations and restrictions
+                      {t('Compliance with ZTL regulations and restrictions')}
                     </p>
                   </div>
                 </div>
@@ -315,9 +320,9 @@ const AIRouteOptimizer = () => {
                 <div className="flex items-start gap-3">
                   <Clock className="h-5 w-5 mt-0.5 text-primary" />
                   <div>
-                    <h4 className="font-medium">Delivery Windows</h4>
+                    <h4 className="font-medium">{t('Delivery Windows')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Time-sensitive delivery scheduling
+                      {t('Time-sensitive delivery scheduling')}
                     </p>
                   </div>
                 </div>
@@ -331,7 +336,7 @@ const AIRouteOptimizer = () => {
         <div className="mt-8">
           <Card>
             <CardHeader>
-              <CardTitle>Optimized Route Results</CardTitle>
+              <CardTitle>{t('Optimized Route Results')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -339,20 +344,20 @@ const AIRouteOptimizer = () => {
                   <div className="border rounded-lg p-4">
                     <h3 className="font-medium mb-3 flex items-center gap-2">
                       <Route className="h-4 w-4" />
-                      Route Summary
+                      {t('routeSummary')}
                     </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Distance</span>
+                        <span className="text-sm text-muted-foreground">{t('Distance')}</span>
                         <span className="font-medium">{optimizedRoute.distance_km.toFixed(2)} km</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Estimated Time</span>
+                        <span className="text-sm text-muted-foreground">{t('Estimated Time')}</span>
                         <span className="font-medium">{optimizedRoute.estimated_time_minutes} minutes</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Vehicle</span>
-                        <span className="font-medium">{getVehicleIcon()} {vehicleType === 'electric_van' ? 'Electric Van' : 'Cargo Bike'}</span>
+                        <span className="text-sm text-muted-foreground">{t('Vehicle')}</span>
+                        <span className="font-medium">{getVehicleIcon()} {vehicleType === 'electric_van' ? t('Electric Van') : t('Cargo Bike')}</span>
                       </div>
                     </div>
                   </div>
@@ -360,21 +365,21 @@ const AIRouteOptimizer = () => {
                   <div className="border rounded-lg p-4">
                     <h3 className="font-medium mb-3 flex items-center gap-2">
                       <BatteryCharging className="h-4 w-4" />
-                      Energy Efficiency
+                      {t('energyEfficiency')}
                     </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Energy Consumption</span>
+                        <span className="text-sm text-muted-foreground">{t('Energy Consumption')}</span>
                         <span className="font-medium">{optimizedRoute.energy_consumption_kwh.toFixed(2)} kWh</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Charging Stops</span>
+                        <span className="text-sm text-muted-foreground">{t('Charging Stops')}</span>
                         <span className="font-medium">{optimizedRoute.charging_stops}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">ZTL Compliance</span>
+                        <span className="text-sm text-muted-foreground">{t('ZTL Compliance')}</span>
                         <span className="font-medium">
-                          {optimizedRoute.low_emission_zone_compliance ? '✅ Compliant' : '❌ Not Compliant'}
+                          {optimizedRoute.low_emission_zone_compliance ? '✅ ' + t('Compliant') : '❌ ' + t('Not Compliant')}
                         </span>
                       </div>
                     </div>
@@ -384,39 +389,55 @@ const AIRouteOptimizer = () => {
                 <div className="border rounded-lg p-4">
                   <h3 className="font-medium mb-3 flex items-center gap-2">
                     <Leaf className="h-4 w-4" />
-                    Sustainability Impact
+                    {t('sustainabilityImpact')}
                   </h3>
                   <p className="text-muted-foreground mb-3">
-                    This optimized route contributes to your sustainability goals by:
+                    {t('This optimized route contributes to your sustainability goals by:')}
                   </p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
                       <span className="text-green-500 mt-0.5">•</span>
-                      <span>Reducing carbon emissions through modal shift from road to rail</span>
+                      <span>{t('Reducing carbon emissions through modal shift from road to rail')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-green-500 mt-0.5">•</span>
-                      <span>Using zero-emission electric vehicles for last-mile delivery</span>
+                      <span>{t('Using zero-emission electric vehicles for last-mile delivery')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-green-500 mt-0.5">•</span>
-                      <span>Minimizing urban congestion through efficient routing</span>
+                      <span>{t('Minimizing urban congestion through efficient routing')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-green-500 mt-0.5">•</span>
-                      <span>Ensuring compliance with low-emission zone regulations</span>
+                      <span>{t('Ensuring compliance with low-emission zone regulations')}</span>
                     </li>
                   </ul>
                 </div>
 
                 <div className="flex justify-end gap-3">
-                  <Button variant="outline">
-                    <MapPin className="mr-2 h-4 w-4" />
-                    View on Map
-                  </Button>
+                  <Dialog open={showMap} onOpenChange={setShowMap}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <MapPin className="mr-2 h-4 w-4" />
+                        {t('viewOnMap')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl">
+                      <DialogHeader>
+                        <DialogTitle>{t('mapView')}</DialogTitle>
+                      </DialogHeader>
+                      <div className="h-[600px]">
+                        <RouteMap
+                          hubs={hubs}
+                          route={optimizedRoute}
+                          height="100%"
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   <Button>
                     <Route className="mr-2 h-4 w-4" />
-                    Assign to Driver
+                    {t('assignToDriver')}
                   </Button>
                 </div>
               </div>

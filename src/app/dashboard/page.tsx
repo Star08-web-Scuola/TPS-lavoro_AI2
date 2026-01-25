@@ -1,4 +1,6 @@
 import IntermodalDashboard from '@/components/IntermodalDashboard';
+import { redirect } from 'next/navigation';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function DashboardPage() {
   return (

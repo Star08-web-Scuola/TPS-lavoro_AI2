@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SustainabilityMetric, Shipment } from '@/types/database';
 import { Leaf, BarChart, FileText, Download, Calendar, Truck, Train } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/components/language/LanguageContext';
 
 const SustainabilityReporting = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -23,6 +24,7 @@ const SustainabilityReporting = () => {
   const [loading, setLoading] = useState(false);
   const [reportGenerated, setReportGenerated] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,14 +49,14 @@ const SustainabilityReporting = () => {
 
       } catch (err) {
         console.error('Error fetching sustainability data:', err);
-        toast.error('Failed to load sustainability data');
+        toast.error(t('Failed to load sustainability data'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [t]);
 
   const generateReport = () => {
     try {
@@ -123,11 +125,11 @@ const SustainabilityReporting = () => {
 
       setReportData(report);
       setReportGenerated(true);
-      toast.success('Sustainability report generated successfully!');
+      toast.success(t('Sustainability report generated successfully!'));
 
     } catch (err) {
       console.error('Error generating report:', err);
-      toast.error('Failed to generate sustainability report');
+      toast.error(t('Failed to generate sustainability report'));
     } finally {
       setLoading(false);
     }
@@ -185,45 +187,45 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    toast.success('Report downloaded successfully!');
+    toast.success(t('Report downloaded successfully!'));
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
         <Leaf className="h-8 w-8" />
-        Sustainability Reporting
+        {t('sustainabilityReporting')}
       </h1>
 
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Generate ESG Report</CardTitle>
+          <CardTitle>{t('generateESGReport')}</CardTitle>
           <CardDescription>
-            Create certified sustainability reports for your intermodal logistics operations
+            {t('Create certified sustainability reports for your intermodal logistics operations')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="report-period">Report Period</Label>
+                <Label htmlFor="report-period">{t('reportPeriod')}</Label>
                 <Select
                   value={reportPeriod}
                   onValueChange={(value) => setReportPeriod(value as 'monthly' | 'quarterly' | 'annual')}
                 >
                   <SelectTrigger id="report-period">
-                    <SelectValue placeholder="Select report period" />
+                    <SelectValue placeholder={t('Select report period')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="quarterly">Quarterly</SelectItem>
-                    <SelectItem value="annual">Annual</SelectItem>
+                    <SelectItem value="monthly">{t('Monthly')}</SelectItem>
+                    <SelectItem value="quarterly">{t('Quarterly')}</SelectItem>
+                    <SelectItem value="annual">{t('Annual')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Date Range</Label>
+                <Label>{t('dateRange')}</Label>
                 <div className="flex gap-2">
                   <DatePicker
                     selected={customDateRange.from}
@@ -247,12 +249,12 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
               {loading ? (
                 <>
                   <span className="animate-spin mr-2">🔄</span>
-                  Generating Report...
+                  {t('Generating Report')}
                 </>
               ) : (
                 <>
                   <BarChart className="mr-2 h-4 w-4" />
-                  Generate Report
+                  {t('generateReport')}
                 </>
               )}
             </Button>
@@ -264,7 +266,7 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Sustainability Report Summary</CardTitle>
+              <CardTitle>{t('Sustainability Report Summary')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -272,19 +274,19 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                   <div className="border rounded-lg p-4">
                     <h3 className="font-medium mb-3 flex items-center gap-2">
                       <Truck className="h-4 w-4" />
-                      Operational Summary
+                      {t('operationalSummary')}
                     </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Total Shipments</span>
+                        <span className="text-sm text-muted-foreground">{t('Total Shipments')}</span>
                         <span className="font-medium">{reportData.summary.totalShipments}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Delivered Shipments</span>
+                        <span className="text-sm text-muted-foreground">{t('Delivered Shipments')}</span>
                         <span className="font-medium">{reportData.summary.deliveredShipments}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">On-Time Delivery Rate</span>
+                        <span className="text-sm text-muted-foreground">{t('onTimeDeliveryRate')}</span>
                         <span className="font-medium">{reportData.summary.onTimeDeliveryRate}</span>
                       </div>
                     </div>
@@ -293,19 +295,19 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                   <div className="border rounded-lg p-4">
                     <h3 className="font-medium mb-3 flex items-center gap-2">
                       <Leaf className="h-4 w-4" />
-                      Environmental Impact
+                      {t('environmentalImpact')}
                     </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Total CO₂ Savings</span>
+                        <span className="text-sm text-muted-foreground">{t('Total CO₂ Savings')}</span>
                         <span className="font-medium text-green-600">{reportData.summary.totalCO2Savings}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Road Equivalent CO₂</span>
+                        <span className="text-sm text-muted-foreground">{t('Road Equivalent CO₂')}</span>
                         <span className="font-medium">{reportData.summary.roadEquivalentCO2}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">CO₂ Reduction</span>
+                        <span className="text-sm text-muted-foreground">{t('CO₂ Reduction')}</span>
                         <span className="font-medium text-green-600">{reportData.modalShift.co2Reduction}</span>
                       </div>
                     </div>
@@ -315,18 +317,18 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                 <div className="border rounded-lg p-4">
                   <h3 className="font-medium mb-3 flex items-center gap-2">
                     <Train className="h-4 w-4" />
-                    Modal Shift Impact
+                    {t('modalShift')}
                   </h3>
                   <p className="text-muted-foreground mb-3">
-                    By shifting freight from road to rail and using electric last-mile delivery:
+                    {t('By shifting freight from road to rail and using electric last-mile delivery:')}
                   </p>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Rail Shipments</span>
+                      <span className="text-sm text-muted-foreground">{t('Rail Shipments')}</span>
                       <span className="font-medium">{reportData.modalShift.railShipments}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Road Shipments Avoided</span>
+                      <span className="text-sm text-muted-foreground">{t('Road Shipments Avoided')}</span>
                       <span className="font-medium">{reportData.modalShift.roadShipmentsAvoided}</span>
                     </div>
                   </div>
@@ -335,19 +337,19 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                 <div className="border rounded-lg p-4">
                   <h3 className="font-medium mb-3 flex items-center gap-2">
                     <BarChart className="h-4 w-4" />
-                    Sustainability Metrics
+                    {t('Sustainability Metrics')}
                   </h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">CO₂ Savings</span>
+                      <span className="text-sm text-muted-foreground">{t('CO₂ Savings')}</span>
                       <span className="font-medium">{reportData.sustainabilityMetrics.co2Savings}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Energy Consumption</span>
+                      <span className="text-sm text-muted-foreground">{t('Energy Consumption')}</span>
                       <span className="font-medium">{reportData.sustainabilityMetrics.energyConsumption}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Congestion Reduction</span>
+                      <span className="text-sm text-muted-foreground">{t('Congestion Reduction')}</span>
                       <span className="font-medium">{reportData.sustainabilityMetrics.congestionReduction}</span>
                     </div>
                   </div>
@@ -356,31 +358,31 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                 <div className="border rounded-lg p-4 bg-green-50">
                   <h3 className="font-medium mb-3 flex items-center gap-2">
                     <FileText className="h-4 w-4" />
-                    ESG Certification
+                    {t('esgCertification')}
                   </h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Compliance Standard</span>
+                      <span className="text-sm text-muted-foreground">{t('Compliance Standard')}</span>
                       <span className="font-medium">{reportData.esgCertification.compliance}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Verification Date</span>
+                      <span className="text-sm text-muted-foreground">{t('Verification Date')}</span>
                       <span className="font-medium">{reportData.esgCertification.verificationDate}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Verified By</span>
+                      <span className="text-sm text-muted-foreground">{t('Verified By')}</span>
                       <span className="font-medium">{reportData.esgCertification.verifiedBy}</span>
                     </div>
                   </div>
                   <p className="text-sm text-green-600 mt-3 font-medium">
-                    ✅ This report certifies your sustainability achievements and can be used for ESG compliance reporting.
+                    ✅ {t('This report certifies your sustainability achievements and can be used for ESG compliance reporting.')}
                   </p>
                 </div>
 
                 <div className="flex justify-end">
                   <Button onClick={handleDownloadReport}>
                     <Download className="mr-2 h-4 w-4" />
-                    Download Report
+                    {t('downloadReport')}
                   </Button>
                 </div>
               </div>
@@ -389,17 +391,16 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
 
           <Card>
             <CardHeader>
-              <CardTitle>Sustainability Insights</CardTitle>
+              <CardTitle>{t('Sustainability Insights')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <Leaf className="h-5 w-5 mt-0.5 text-green-500" />
                   <div>
-                    <h4 className="font-medium">Carbon Emission Reduction</h4>
+                    <h4 className="font-medium">{t('Carbon Emission Reduction')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      By utilizing rail transport for long-haul freight and electric vehicles for last-mile delivery,
-                      you've significantly reduced carbon emissions compared to traditional road transport.
+                      {t('By utilizing rail transport for long-haul freight and electric vehicles for last-mile delivery, you have significantly reduced carbon emissions compared to traditional road transport.')}
                     </p>
                   </div>
                 </div>
@@ -407,10 +408,9 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                 <div className="flex items-start gap-3">
                   <Train className="h-5 w-5 mt-0.5 text-blue-500" />
                   <div>
-                    <h4 className="font-medium">Modal Shift Success</h4>
+                    <h4 className="font-medium">{t('Modal Shift Success')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      The shift from road to rail transport has reduced highway congestion and lowered the environmental
-                      impact of your logistics operations.
+                      {t('The shift from road to rail transport has reduced highway congestion and lowered the environmental impact of your logistics operations.')}
                     </p>
                   </div>
                 </div>
@@ -418,10 +418,9 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                 <div className="flex items-start gap-3">
                   <Truck className="h-5 w-5 mt-0.5 text-yellow-500" />
                   <div>
-                    <h4 className="font-medium">Urban Congestion Relief</h4>
+                    <h4 className="font-medium">{t('Urban Congestion Relief')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Electric cargo bikes and vans for last-mile delivery have reduced urban traffic congestion
-                      and improved air quality in city centers.
+                      {t('Electric cargo bikes and vans for last-mile delivery have reduced urban traffic congestion and improved air quality in city centers.')}
                     </p>
                   </div>
                 </div>
