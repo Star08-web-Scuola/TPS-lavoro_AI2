@@ -1,0 +1,310 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { Shipment, Hub } from '@/types/database';
+import { MapPin, Truck, Train, Leaf, Clock, AlertTriangle } from 'lucide-react';
+
+const IntermodalDashboard = () => {
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [hubs, setHubs] = useState<Hub[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch shipments data
+        const { data: shipmentsData, error: shipmentsError } = await supabase
+          .from('shipments')
+          .select('*')
+          .order('updated_at', { ascending: false });
+
+        if (shipmentsError) throw shipmentsError;
+        setShipments(shipmentsData || []);
+
+        // Fetch hubs data
+        const { data: hubsData, error: hubsError } = await supabase
+          .from('hubs')
+          .select('*');
+
+        if (hubsError) throw hubsError;
+        setHubs(hubsData || []);
+
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data. Please refresh the page.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Set up real-time subscription for shipments
+    const shipmentSubscription = supabase
+      .channel('shipment_updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'shipments'
+      }, (payload) => {
+        setShipments(prev => {
+          const existingIndex = prev.findIndex(s => s.id === payload.new.id);
+          if (existingIndex >= 0) {
+            return prev.map(s => s.id === payload.new.id ? payload.new : s);
+          } else {
+            return [...prev, payload.new];
+          }
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(shipmentSubscription);
+    };
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'delivered': return 'bg-green-100 text-green-800';
+      case 'out_for_delivery': return 'bg-blue-100 text-blue-800';
+      case 'at_hub': return 'bg-yellow-100 text-yellow-800';
+      case 'in_transit': return 'bg-purple-100 text-purple-800';
+      case 'delayed': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const calculateCO2Savings = () => {
+    return shipments.reduce((total, shipment) => total + (shipment.co2_savings_kg || 0), 0);
+  };
+
+  const inTransitCount = shipments.filter(s => s.delivery_status === 'in_transit').length;
+  const atHubCount = shipments.filter(s => s.delivery_status === 'at_hub').length;
+  const deliveredCount = shipments.filter(s => s.delivery_status === 'delivered').length;
+  const delayedCount = shipments.filter(s => s.delivery_status === 'delayed').length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-2 rounded-md">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
+        <Train className="h-8 w-8" />
+        Intermodal Dashboard
+      </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total CO₂ Savings</CardTitle>
+            <Leaf className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{calculateCO2Savings().toFixed(2)} kg</div>
+            <p className="text-xs text-muted-foreground">Compared to road transport</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">In Transit</CardTitle>
+            <Truck className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{inTransitCount}</div>
+            <p className="text-xs text-muted-foreground">Active shipments</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">At Hubs</CardTitle>
+            <MapPin className="h-4 w-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{atHubCount}</div>
+            <p className="text-xs text-muted-foreground">Ready for last-mile</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Delayed</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{delayedCount}</div>
+            <p className="text-xs text-muted-foreground">Needs attention</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="shipments" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="shipments">Shipments</TabsTrigger>
+          <TabsTrigger value="hubs">Hubs</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="shipments">
+          <Card>
+            <CardHeader>
+              <CardTitle>Shipment Tracking</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {shipments.length === 0 ? (
+                  <p className="text-muted-foreground">No shipments found</p>
+                ) : (
+                  <div className="space-y-3">
+                    {shipments.slice(0, 10).map((shipment) => (
+                      <div key={shipment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(shipment.delivery_status)}`}>
+                            {shipment.delivery_status}
+                          </div>
+                          <div>
+                            <p className="font-medium">{shipment.shipment_number}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {shipment.origin} → {shipment.destination}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm">
+                            {shipment.delivery_status === 'delivered'
+                              ? `Delivered: ${new Date(shipment.actual_delivery_time || '').toLocaleString()}`
+                              : `ETA: ${new Date(shipment.estimated_delivery_time).toLocaleString()}`}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {shipment.co2_savings_kg.toFixed(1)} kg CO₂ saved
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="hubs">
+          <Card>
+            <CardHeader>
+              <CardTitle>Intermodal Hubs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {hubs.map((hub) => (
+                  <div key={hub.id} className="border rounded-lg p-4">
+                    <h3 className="font-semibold mb-2">{hub.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      <MapPin className="inline h-3 w-3 mr-1" />
+                      {hub.location}
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Capacity: {hub.capacity} TEU
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Charging Stations: {hub.charging_stations}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      {hub.low_emission_zone && (
+                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                          Low Emission Zone
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sustainability Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-2">Modal Shift Impact</h3>
+                  <p className="text-muted-foreground">
+                    By shifting freight from road to rail and using electric last-mile delivery,
+                    GreenPath Analytics helps reduce urban congestion and carbon emissions.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-2">CO₂ Savings Breakdown</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Rail vs Road</span>
+                        <span className="text-sm font-medium">{(calculateCO2Savings() * 0.7).toFixed(2)} kg</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Electric Last-Mile</span>
+                        <span className="text-sm font-medium">{(calculateCO2Savings() * 0.3).toFixed(2)} kg</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-2">Operational Efficiency</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm">On-time Delivery Rate</span>
+                        <span className="text-sm font-medium">
+                          {shipments.length > 0
+                            ? `${Math.round((deliveredCount / shipments.length) * 100)}%`
+                            : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Hub Utilization</span>
+                        <span className="text-sm font-medium">
+                          {hubs.length > 0
+                            ? `${Math.round((atHubCount / hubs.reduce((sum, hub) => sum + hub.capacity, 0)) * 100)}%`
+                            : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default IntermodalDashboard;
