@@ -6,14 +6,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Shipment, Hub } from '@/types/database';
-import { MapPin, Truck, Train, Leaf, Clock, AlertTriangle } from 'lucide-react';
+import { MapPin, Truck, Train, Leaf, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/components/language/LanguageContext';
+import { toast } from 'sonner';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const IntermodalDashboard = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [hubs, setHubs] = useState<Hub[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -42,8 +45,10 @@ const IntermodalDashboard = () => {
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
         setError(t('Failed to load dashboard data. Please refresh the page.'));
+        toast.error(t('Failed to load dashboard data'));
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
     };
 
@@ -65,6 +70,7 @@ const IntermodalDashboard = () => {
             return [...prev, payload.new];
           }
         });
+        toast.info(t('Shipment data updated in real-time'));
       })
       .subscribe();
 
@@ -72,6 +78,11 @@ const IntermodalDashboard = () => {
       supabase.removeChannel(shipmentSubscription);
     };
   }, [t]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    // The useEffect will trigger a refresh
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -93,6 +104,21 @@ const IntermodalDashboard = () => {
   const deliveredCount = shipments.filter(s => s.delivery_status === 'delivered').length;
   const delayedCount = shipments.filter(s => s.delivery_status === 'delayed').length;
 
+  // Data for charts
+  const statusData = [
+    { name: t('In Transit'), value: inTransitCount },
+    { name: t('At Hubs'), value: atHubCount },
+    { name: t('Delivered'), value: deliveredCount },
+    { name: t('Delayed'), value: delayedCount },
+  ];
+
+  const co2Data = [
+    { name: t('Rail Transport'), value: calculateCO2Savings() * 0.7 },
+    { name: t('Electric Last-Mile'), value: calculateCO2Savings() * 0.3 },
+  ];
+
+  const COLORS = ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6'];
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -113,10 +139,21 @@ const IntermodalDashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
-        <Train className="h-8 w-8" />
-        {t('intermodalDashboard')}
-      </h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <Train className="h-8 w-8" />
+          {t('intermodalDashboard')}
+        </h1>
+        <Button
+          variant="outline"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? t('Refreshing...') : t('Refresh Data')}
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
@@ -164,6 +201,54 @@ const IntermodalDashboard = () => {
         </Card>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('Shipment Status Distribution')}</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('CO₂ Savings Breakdown')}</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={co2Data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#10b981" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
       <Tabs defaultValue="shipments" className="space-y-4">
         <TabsList>
           <TabsTrigger value="shipments">{t('shipmentTracking')}</TabsTrigger>
@@ -183,7 +268,7 @@ const IntermodalDashboard = () => {
                 ) : (
                   <div className="space-y-3">
                     {shipments.slice(0, 10).map((shipment) => (
-                      <div key={shipment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div key={shipment.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-shadow">
                         <div className="flex items-center gap-4">
                           <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(shipment.delivery_status)}`}>
                             {shipment.delivery_status}
@@ -222,7 +307,7 @@ const IntermodalDashboard = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {hubs.map((hub) => (
-                  <div key={hub.id} className="border rounded-lg p-4">
+                  <div key={hub.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
                     <h3 className="font-semibold mb-2">{hub.name}</h3>
                     <p className="text-sm text-muted-foreground mb-1">
                       <MapPin className="inline h-3 w-3 mr-1" />

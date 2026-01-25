@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { Shipment, Hub, RouteOptimization } from '@/types/database';
-import { MapPin, Route, BatteryCharging, Leaf, Clock, AlertCircle } from 'lucide-react';
+import { MapPin, Route, BatteryCharging, Leaf, Clock, AlertCircle, Truck, Train, Bike, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/components/language/LanguageContext';
 import RouteMap from '@/components/RouteMap';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const AIRouteOptimizer = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -25,6 +27,12 @@ const AIRouteOptimizer = () => {
   const [optimizedRoute, setOptimizedRoute] = useState<RouteOptimization | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [optimizationPreferences, setOptimizationPreferences] = useState({
+    avoidTolls: true,
+    preferChargingStations: true,
+    avoidLowEmissionZones: false,
+    maxDistance: 100
+  });
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -88,6 +96,18 @@ const AIRouteOptimizer = () => {
         destination.latitude, destination.longitude
       );
 
+      // Apply optimization preferences
+      let adjustedDistance = distance;
+      let chargingStops = 0;
+
+      if (optimizationPreferences.preferChargingStations && vehicleType === 'electric_van') {
+        chargingStops = Math.ceil(distance / 50);
+      }
+
+      if (optimizationPreferences.avoidTolls) {
+        adjustedDistance *= 1.1; // Slightly longer route to avoid tolls
+      }
+
       // Simulate AI optimization logic
       const optimizedData: RouteOptimization = {
         id: crypto.randomUUID(),
@@ -105,13 +125,13 @@ const AIRouteOptimizer = () => {
             ]
           }
         }),
-        distance_km: distance,
-        estimated_time_minutes: Math.round(distance * 2 + (vehicleType === 'cargo_bike' ? distance * 3 : distance * 1.5)),
+        distance_km: adjustedDistance,
+        estimated_time_minutes: Math.round(adjustedDistance * 2 + (vehicleType === 'cargo_bike' ? adjustedDistance * 3 : adjustedDistance * 1.5)),
         energy_consumption_kwh: vehicleType === 'electric_van'
-          ? distance * 0.2
-          : distance * 0.05,
-        charging_stops: vehicleType === 'electric_van' && distance > 50 ? 1 : 0,
-        low_emission_zone_compliance: destination.low_emission_zone,
+          ? adjustedDistance * 0.2
+          : adjustedDistance * 0.05,
+        charging_stops: chargingStops,
+        low_emission_zone_compliance: !optimizationPreferences.avoidLowEmissionZones && destination.low_emission_zone,
         traffic_conditions: 'moderate',
         created_at: new Date().toISOString()
       };
@@ -152,6 +172,10 @@ const AIRouteOptimizer = () => {
 
   const getVehicleIcon = () => {
     return vehicleType === 'electric_van' ? '🚐⚡' : '🚲📦';
+  };
+
+  const handlePreferenceChange = (key: string, value: any) => {
+    setOptimizationPreferences(prev => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -244,10 +268,68 @@ const AIRouteOptimizer = () => {
                         <SelectValue placeholder={t('selectVehicleType')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="electric_van">{t('Electric Van')}</SelectItem>
-                        <SelectItem value="cargo_bike">{t('Cargo Bike')}</SelectItem>
+                        <SelectItem value="electric_van">
+                          <div className="flex items-center gap-2">
+                            <Truck className="h-4 w-4" />
+                            {t('Electric Van')}
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="cargo_bike">
+                          <div className="flex items-center gap-2">
+                            <Bike className="h-4 w-4" />
+                            {t('Cargo Bike')}
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">{t('Optimization Preferences')}</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Zap className="h-4 w-4" />
+                        <span>{t('Avoid Tolls')}</span>
+                      </div>
+                      <Checkbox
+                        checked={optimizationPreferences.avoidTolls}
+                        onCheckedChange={(checked) => handlePreferenceChange('avoidTolls', checked)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <BatteryCharging className="h-4 w-4" />
+                        <span>{t('Prefer Charging Stations')}</span>
+                      </div>
+                      <Checkbox
+                        checked={optimizationPreferences.preferChargingStations}
+                        onCheckedChange={(checked) => handlePreferenceChange('preferChargingStations', checked)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <AlertCircle className="h-4 w-4" />
+                        <span>{t('Avoid Low Emission Zones')}</span>
+                      </div>
+                      <Checkbox
+                        checked={optimizationPreferences.avoidLowEmissionZones}
+                        onCheckedChange={(checked) => handlePreferenceChange('avoidLowEmissionZones', checked)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>{t('Max Distance (km)')}: {optimizationPreferences.maxDistance}</Label>
+                      <Slider
+                        value={[optimizationPreferences.maxDistance]}
+                        onValueChange={(value) => handlePreferenceChange('maxDistance', value[0])}
+                        max={200}
+                        step={10}
+                      />
+                    </div>
                   </div>
                 </div>
 

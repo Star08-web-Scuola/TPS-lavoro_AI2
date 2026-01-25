@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DatePicker } from '@/components/ui/date-picker';
 import { supabase } from '@/integrations/supabase/client';
 import { SustainabilityMetric, Shipment } from '@/types/database';
-import { Leaf, BarChart, FileText, Download, Calendar, Truck, Train } from 'lucide-react';
+import { Leaf, BarChart, FileText, Download, Calendar, Truck, Train, PieChart, LineChart, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/components/language/LanguageContext';
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Pie, Cell } from 'recharts';
 
 const SustainabilityReporting = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -83,6 +84,10 @@ const SustainabilityReporting = () => {
       const railShipments = filteredShipments.length;
       const roadEquivalentCO2 = totalCO2Savings * 4; // Assuming 4x more CO2 for road transport
 
+      // Calculate additional sustainability metrics
+      const co2PerShipment = totalShipments > 0 ? totalCO2Savings / totalShipments : 0;
+      const deliverySuccessRate = totalShipments > 0 ? (deliveredShipments / totalShipments) * 100 : 0;
+
       // Generate report data
       const report = {
         period: reportPeriod,
@@ -95,12 +100,15 @@ const SustainabilityReporting = () => {
           deliveredShipments,
           onTimeDeliveryRate: onTimeRate.toFixed(2) + '%',
           totalCO2Savings: totalCO2Savings.toFixed(2) + ' kg',
-          roadEquivalentCO2: roadEquivalentCO2.toFixed(2) + ' kg'
+          roadEquivalentCO2: roadEquivalentCO2.toFixed(2) + ' kg',
+          co2PerShipment: co2PerShipment.toFixed(2) + ' kg',
+          deliverySuccessRate: deliverySuccessRate.toFixed(2) + '%'
         },
         modalShift: {
           railShipments,
           roadShipmentsAvoided: railShipments,
-          co2Reduction: (roadEquivalentCO2 - totalCO2Savings).toFixed(2) + ' kg'
+          co2Reduction: (roadEquivalentCO2 - totalCO2Savings).toFixed(2) + ' kg',
+          co2ReductionPercentage: totalCO2Savings > 0 ? (((roadEquivalentCO2 - totalCO2Savings) / roadEquivalentCO2) * 100).toFixed(2) + '%' : '0%'
         },
         sustainabilityMetrics: {
           co2Savings: filteredMetrics
@@ -114,12 +122,17 @@ const SustainabilityReporting = () => {
           congestionReduction: filteredMetrics
             .filter(m => m.metric_type === 'congestion_reduction')
             .reduce((sum, metric) => sum + metric.value, 0)
-            .toFixed(2) + ' vehicle-hours'
+            .toFixed(2) + ' vehicle-hours',
+          modalShiftEfficiency: filteredMetrics
+            .filter(m => m.metric_type === 'modal_shift')
+            .reduce((sum, metric) => sum + metric.value, 0)
+            .toFixed(2) + '%'
         },
         esgCertification: {
           compliance: 'ISO 14064-1:2018',
           verificationDate: new Date().toISOString().split('T')[0],
-          verifiedBy: 'GreenPath Analytics Certification'
+          verifiedBy: 'GreenPath Analytics Certification',
+          carbonIntensity: (totalCO2Savings / totalShipments).toFixed(2) + ' kg CO₂/shipment'
         }
       };
 
@@ -153,24 +166,29 @@ Delivered Shipments: ${reportData.summary.deliveredShipments}
 On-Time Delivery Rate: ${reportData.summary.onTimeDeliveryRate}
 Total CO₂ Savings: ${reportData.summary.totalCO2Savings}
 Road Transport Equivalent CO₂: ${reportData.summary.roadEquivalentCO2}
+CO₂ per Shipment: ${reportData.summary.co2PerShipment}
+Delivery Success Rate: ${reportData.summary.deliverySuccessRate}
 
 MODAL SHIFT IMPACT
 ------------------
 Rail Shipments: ${reportData.modalShift.railShipments}
 Road Shipments Avoided: ${reportData.modalShift.roadShipmentsAvoided}
 CO₂ Reduction: ${reportData.modalShift.co2Reduction}
+CO₂ Reduction Percentage: ${reportData.modalShift.co2ReductionPercentage}
 
 SUSTAINABILITY METRICS
 ----------------------
 CO₂ Savings: ${reportData.sustainabilityMetrics.co2Savings}
 Energy Consumption: ${reportData.sustainabilityMetrics.energyConsumption}
 Congestion Reduction: ${reportData.sustainabilityMetrics.congestionReduction}
+Modal Shift Efficiency: ${reportData.sustainabilityMetrics.modalShiftEfficiency}
 
 ESG CERTIFICATION
 -----------------
 Compliance Standard: ${reportData.esgCertification.compliance}
 Verification Date: ${reportData.esgCertification.verificationDate}
 Verified By: ${reportData.esgCertification.verifiedBy}
+Carbon Intensity: ${reportData.esgCertification.carbonIntensity}
 
 This report certifies that GreenPath Analytics has successfully reduced carbon emissions
 through intermodal logistics optimization and sustainable last-mile delivery solutions.
@@ -189,6 +207,19 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
 
     toast.success(t('Report downloaded successfully!'));
   };
+
+  // Chart data
+  const co2BreakdownData = [
+    { name: t('Rail Transport'), value: reportData?.summary.totalCO2Savings ? parseFloat(reportData.summary.totalCO2Savings) * 0.7 : 0 },
+    { name: t('Electric Last-Mile'), value: reportData?.summary.totalCO2Savings ? parseFloat(reportData.summary.totalCO2Savings) * 0.3 : 0 },
+  ];
+
+  const performanceData = [
+    { name: t('On-Time Rate'), value: reportData?.summary.onTimeDeliveryRate ? parseFloat(reportData.summary.onTimeDeliveryRate) : 0 },
+    { name: t('Success Rate'), value: reportData?.summary.deliverySuccessRate ? parseFloat(reportData.summary.deliverySuccessRate) : 0 },
+  ];
+
+  const COLORS = ['#10b981', '#3b82f6', '#ef4444', '#8b5cf6'];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -264,6 +295,50 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
 
       {reportGenerated && reportData && (
         <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <PieChart className="h-5 w-5" />
+                  {t('CO₂ Savings Breakdown')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsBarChart data={co2BreakdownData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" fill="#10b981" />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  {t('Performance Metrics')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsBarChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" fill="#3b82f6" />
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>{t('Sustainability Report Summary')}</CardTitle>
@@ -289,6 +364,10 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                         <span className="text-sm text-muted-foreground">{t('onTimeDeliveryRate')}</span>
                         <span className="font-medium">{reportData.summary.onTimeDeliveryRate}</span>
                       </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{t('Delivery Success Rate')}</span>
+                        <span className="font-medium">{reportData.summary.deliverySuccessRate}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -305,6 +384,10 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">{t('Road Equivalent CO₂')}</span>
                         <span className="font-medium">{reportData.summary.roadEquivalentCO2}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{t('CO₂ per Shipment')}</span>
+                        <span className="font-medium">{reportData.summary.co2PerShipment}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">{t('CO₂ Reduction')}</span>
@@ -331,6 +414,10 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                       <span className="text-sm text-muted-foreground">{t('Road Shipments Avoided')}</span>
                       <span className="font-medium">{reportData.modalShift.roadShipmentsAvoided}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">{t('CO₂ Reduction Percentage')}</span>
+                      <span className="font-medium text-green-600">{reportData.modalShift.co2ReductionPercentage}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -352,6 +439,10 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                       <span className="text-sm text-muted-foreground">{t('Congestion Reduction')}</span>
                       <span className="font-medium">{reportData.sustainabilityMetrics.congestionReduction}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">{t('Modal Shift Efficiency')}</span>
+                      <span className="font-medium">{reportData.sustainabilityMetrics.modalShiftEfficiency}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -372,6 +463,10 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">{t('Verified By')}</span>
                       <span className="font-medium">{reportData.esgCertification.verifiedBy}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">{t('Carbon Intensity')}</span>
+                      <span className="font-medium">{reportData.esgCertification.carbonIntensity}</span>
                     </div>
                   </div>
                   <p className="text-sm text-green-600 mt-3 font-medium">
@@ -421,6 +516,16 @@ through intermodal logistics optimization and sustainable last-mile delivery sol
                     <h4 className="font-medium">{t('Urban Congestion Relief')}</h4>
                     <p className="text-sm text-muted-foreground">
                       {t('Electric cargo bikes and vans for last-mile delivery have reduced urban traffic congestion and improved air quality in city centers.')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <LineChart className="h-5 w-5 mt-0.5 text-purple-500" />
+                  <div>
+                    <h4 className="font-medium">{t('Continuous Improvement')}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {t('GreenPath Analytics provides ongoing optimization and reporting to help you continuously improve your sustainability performance and meet ESG goals.')}
                     </p>
                   </div>
                 </div>
