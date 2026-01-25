@@ -1,9 +1,10 @@
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import AIRouteOptimizer from '@/components/AIRouteOptimizer';
 
 export default function RouteOptimizerPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <ProtectedRoute>
       <AIRouteOptimizer />
-    </div>
+    </ProtectedRoute>
   );
 }

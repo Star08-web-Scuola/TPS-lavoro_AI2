@@ -6,6 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useLanguage } from '@/components/language/LanguageContext';
 import { Button } from '@/components/ui/button';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 export function ClientHeader() {
   const { user, signOut } = useAuth();
@@ -40,6 +41,7 @@ export function ClientHeader() {
 
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
+          <ThemeSwitcher />
           {user ? (
             <Button
               variant="outline"
