@@ -28,6 +28,26 @@ const translations = {
     error: 'Error',
     success: 'Success',
 
+    // Landing Page
+    'Infrastructure for Sustainable Mobility': 'Infrastructure for Sustainable Mobility',
+    'Intermodal Dashboard': 'Intermodal Dashboard',
+    'Real-time tracking of freight arriving at rail terminals and last-mile delivery status.': 'Real-time tracking of freight arriving at rail terminals and last-mile delivery status.',
+    'View Dashboard': 'View Dashboard',
+    'AI Route Optimizer': 'AI Route Optimizer',
+    'Energy-efficient routes for electric vans and cargo bikes considering traffic, charging stations, and ZTL restrictions.': 'Energy-efficient routes for electric vans and cargo bikes considering traffic, charging stations, and ZTL restrictions.',
+    'Optimize Routes': 'Optimize Routes',
+    'Sustainability Reporting': 'Sustainability Reporting',
+    'Certified ESG reports on CO₂ savings compared to traditional road transport.': 'Certified ESG reports on CO₂ savings compared to traditional road transport.',
+    'Generate Reports': 'Generate Reports',
+    'Our Mission': 'Our Mission',
+    'GreenPath Analytics optimizes intermodal logistics by connecting rail freight data with last-mile electric delivery fleets to reduce urban congestion and carbon emissions.': 'GreenPath Analytics optimizes intermodal logistics by connecting rail freight data with last-mile electric delivery fleets to reduce urban congestion and carbon emissions.',
+    'Electric Last-Mile': 'Electric Last-Mile',
+    'Zero-emission delivery vehicles for urban areas': 'Zero-emission delivery vehicles for urban areas',
+    'AI Optimization': 'AI Optimization',
+    'Smart routing considering traffic and charging infrastructure': 'Smart routing considering traffic and charging infrastructure',
+    'ESG Compliance': 'ESG Compliance',
+    'Certified sustainability reporting for regulatory compliance': 'Certified sustainability reporting for regulatory compliance',
+
     // Auth
     signIn: 'Sign In',
     signUp: 'Sign Up',
@@ -194,6 +214,26 @@ const translations = {
     loading: 'Caricamento...',
     error: 'Errore',
     success: 'Successo',
+
+    // Landing Page
+    'Infrastructure for Sustainable Mobility': 'Infrastruttura per la Mobilità Sostenibile',
+    'Intermodal Dashboard': 'Dashboard Intermodale',
+    'Real-time tracking of freight arriving at rail terminals and last-mile delivery status.': 'Tracciamento in tempo reale delle merci in arrivo ai terminali ferroviari e stato della consegna dell\'ultimo miglio.',
+    'View Dashboard': 'Visualizza Dashboard',
+    'AI Route Optimizer': 'Ottimizzatore di Percorsi AI',
+    'Energy-efficient routes for electric vans and cargo bikes considering traffic, charging stations, and ZTL restrictions.': 'Percorsi efficienti dal punto di vista energetico per furgoni elettrici e biciclette da carico che tengono conto del traffico, delle stazioni di ricarica e delle restrizioni ZTL.',
+    'Optimize Routes': 'Ottimizza Percorsi',
+    'Sustainability Reporting': 'Reporting di Sostenibilità',
+    'Certified ESG reports on CO₂ savings compared to traditional road transport.': 'Report ESG certificati sui risparmi di CO₂ rispetto al trasporto su strada tradizionale.',
+    'Generate Reports': 'Genera Report',
+    'Our Mission': 'La Nostra Missione',
+    'GreenPath Analytics optimizes intermodal logistics by connecting rail freight data with last-mile electric delivery fleets to reduce urban congestion and carbon emissions.': 'GreenPath Analytics ottimizza la logistica intermodale collegando i dati del trasporto merci su rotaia con le flotte di consegna elettrica dell\'ultimo miglio per ridurre la congestione urbana e le emissioni di carbonio.',
+    'Electric Last-Mile': 'Elettrico Ultimo Miglio',
+    'Zero-emission delivery vehicles for urban areas': 'Veicoli di consegna a zero emissioni per le aree urbane',
+    'AI Optimization': 'Ottimizzazione AI',
+    'Smart routing considering traffic and charging infrastructure': 'Routing intelligente che tiene conto del traffico e dell\'infrastruttura di ricarica',
+    'ESG Compliance': 'Conformità ESG',
+    'Certified sustainability reporting for regulatory compliance': 'Report di sostenibilità certificati per la conformità normativa',
 
     // Auth
     signIn: 'Accedi',
@@ -368,8 +408,6 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   }, [language]);
 
   const t = (key: string): string => {
-    // Debug: log the current language and key
-    console.log(`Translating key: ${key} in language: ${language}`);
     const translation = translations[language][key];
     if (!translation) {
       console.warn(`Missing translation for key: ${key} in language: ${language}`);
