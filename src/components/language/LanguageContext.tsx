@@ -11,8 +11,9 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+type Translations = Record<Language, Record<string, string>>;
 
-const translations = {
+const translations: Translations = {
   en: {
     // Common
     welcome: 'Welcome',
@@ -79,7 +80,6 @@ const translations = {
     'Needs attention': 'Needs attention',
     'Shipment Status Distribution': 'Shipment Status Distribution',
     'Rail vs Road': 'Rail vs Road',
-    'Electric Last-Mile': 'Electric Last-Mile',
     'Rail Transport': 'Rail Transport',
     'Capacity': 'Capacity',
     'Charging Stations': 'Charging Stations',
@@ -153,7 +153,7 @@ const translations = {
     'Generating Report': 'Generating Report',
     'generateReport': 'Generate Report',
     'Total Shipments': 'Total Shipments',
-    'Delivered Shipments': 'Delivered Shiped Shipments',
+    'Delivered Shipments': 'Delivered Shipments',
     'Delivery Success Rate': 'Delivery Success Rate',
     'Road Equivalent CO₂': 'Road Equivalent CO₂',
     'CO₂ per Shipment': 'CO₂ per Shipment',
@@ -273,7 +273,6 @@ const translations = {
     'Needs attention': 'Richiede attenzione',
     'Shipment Status Distribution': 'Distribuzione Stato Spedizioni',
     'Rail vs Road': 'Ferrovia vs Strada',
-    'Electric Last-Mile': 'Elettrico Ultimo Miglio',
     'Rail Transport': 'Trasporto Ferroviario',
     'Capacity': 'Capacità',
     'Charging Stations': 'Stazioni di Ricarica',

@@ -10,6 +10,7 @@ import { MapPin, Truck, Train, Leaf, Clock, AlertTriangle, RefreshCw } from 'luc
 import { useLanguage } from '@/components/language/LanguageContext';
 import { toast } from 'sonner';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 const IntermodalDashboard = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -61,13 +62,25 @@ const IntermodalDashboard = () => {
         event: '*',
         schema: 'public',
         table: 'shipments'
-      }, (payload) => {
+      }, (payload: RealtimePostgresChangesPayload<Shipment>) => {
         setShipments(prev => {
-          const existingIndex = prev.findIndex(s => s.id === payload.new.id);
-          if (existingIndex >= 0) {
-            return prev.map(s => s.id === payload.new.id ? payload.new as Shipment : s);
+          // Gestione DELETE: usa payload.old
+          if (payload.eventType === 'DELETE') {
+            const oldRow = payload.old as Partial<Shipment>;
+            if (!oldRow || !('id' in oldRow)) return prev;
+            return prev.filter(s => s.id !== oldRow.id);
+          }
+
+          // INSERT/UPDATE: usa payload.new con guard
+          const newRow = payload.new as Partial<Shipment>;
+          if (!newRow || !('id' in newRow)) return prev;
+
+          const id = newRow.id as Shipment['id'];
+          const exists = prev.some(s => s.id === id);
+          if (exists) {
+            return prev.map(s => (s.id === id ? { ...s, ...newRow } as Shipment : s));
           } else {
-            return [...prev, payload.new as Shipment];
+            return [...prev, newRow as Shipment];
           }
         });
         toast.info(t('Shipment data updated in real-time'));
@@ -287,7 +300,7 @@ const IntermodalDashboard = () => {
                               : `${t('ETA')}: ${new Date(shipment.estimated_delivery_time).toLocaleString()}`}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {shipment.co2_savings_kg.toFixed(1)} kg CO₂ {t('saved')}
+                            {(shipment.co2_savings_kg ?? 0).toFixed(1)} kg CO₂ {t('saved')}
                           </p>
                         </div>
                       </div>
