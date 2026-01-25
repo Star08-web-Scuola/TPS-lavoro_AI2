@@ -1,6 +1,5 @@
 "use client";
 
-import { MadeWithDyad } from "@/components/made-with-dyad";
 import Link from "next/link";
 import { Leaf, Route, BarChart, Truck, Train, BatteryCharging } from 'lucide-react';
 import { useLanguage } from '@/components/language/LanguageContext';
@@ -104,7 +103,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      <MadeWithDyad />
     </div>
   );
 }
