@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Shipment } from '@/types/database';
 import { useLanguage } from '@/components/language/LanguageContext';
 import { toast } from 'sonner';
-import { Plus, PackagePlus, Truck, Train, Calendar, Clock, Weight, Volume2, Leaf } from 'lucide-react';
+import { Plus, PackagePlus, Truck, Train, Calendar, Clock, Weight, Volume2, Leaf, MapPin } from 'lucide-react';
 
 interface CreateShipmentDialogProps {
   onShipmentCreated: () => void;
