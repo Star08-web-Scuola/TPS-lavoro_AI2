@@ -11,9 +11,8 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-type Translations = Record<Language, Record<string, string>>;
 
-const translations: Translations = {
+const translations = {
   en: {
     // Common
     welcome: 'Welcome',
@@ -205,7 +204,49 @@ const translations: Translations = {
     'Our warehouse cat is searching everywhere but cannot find this page.': 'Our warehouse cat is searching everywhere but cannot find this page.',
     'Return Home': 'Return Home',
     'Go to Dashboard': 'Go to Dashboard',
-    'Our warehouse cat will keep searching...': 'Our warehouse cat will keep searching...'
+    'Our warehouse cat will keep searching...': 'Our warehouse cat will keep searching...',
+
+    // Create Dialogs
+    'Create Shipment': 'Create Shipment',
+    'Create New Shipment': 'Create New Shipment',
+    'Shipment Number': 'Shipment Number',
+    'Origin': 'Origin',
+    'Destination': 'Destination',
+    'Rail Carrier': 'Rail Carrier',
+    'Rail Departure Time': 'Rail Departure Time',
+    'Rail Arrival Time': 'Rail Arrival Time',
+    'Last Mile Carrier': 'Last Mile Carrier',
+    'Delivery Status': 'Delivery Status',
+    'Estimated Delivery Time': 'Estimated Delivery Time',
+    'Weight (kg)': 'Weight (kg)',
+    'Volume (m³)': 'Volume (m³)',
+    'CO₂ Savings (kg)': 'CO₂ Savings (kg)',
+    'Select status': 'Select status',
+    'Pending': 'Pending',
+    'In Transit': 'In Transit',
+    'At Hub': 'At Hub',
+    'Out for Delivery': 'Out for Delivery',
+    'Delivered': 'Delivered',
+    'Delayed': 'Delayed',
+    'Shipment created successfully!': 'Shipment created successfully!',
+    'Failed to create shipment': 'Failed to create shipment',
+    'Shipment created and data refreshed': 'Shipment created and data refreshed',
+    'Failed to refresh shipments': 'Failed to refresh shipments',
+
+    'Create Hub': 'Create Hub',
+    'Create New Hub': 'Create New Hub',
+    'Hub Name': 'Hub Name',
+    'Location': 'Location',
+    'Latitude': 'Latitude',
+    'Longitude': 'Longitude',
+    'Capacity (TEU)': 'Capacity (TEU)',
+    'Charging Stations': 'Charging Stations',
+    'Operating Hours': 'Operating Hours',
+    'Low Emission Zone': 'Low Emission Zone',
+    'Hub created successfully!': 'Hub created successfully!',
+    'Failed to create hub': 'Failed to create hub',
+    'Hub created and data refreshed': 'Hub created and data refreshed',
+    'Failed to refresh hubs': 'Failed to refresh hubs'
   },
   it: {
     // Common
@@ -273,6 +314,7 @@ const translations: Translations = {
     'Needs attention': 'Richiede attenzione',
     'Shipment Status Distribution': 'Distribuzione Stato Spedizioni',
     'Rail vs Road': 'Ferrovia vs Strada',
+    'Electric Last-Mile': 'Elettrico Ultimo Miglio',
     'Rail Transport': 'Trasporto Ferroviario',
     'Capacity': 'Capacità',
     'Charging Stations': 'Stazioni di Ricarica',
@@ -398,7 +440,49 @@ const translations: Translations = {
     'Our warehouse cat is searching everywhere but cannot find this page.': 'Il nostro gatto di magazzino sta cercando ovunque ma non riesce a trovare questa pagina.',
     'Return Home': 'Torna alla Home',
     'Go to Dashboard': 'Vai alla Dashboard',
-    'Our warehouse cat will keep searching...': 'Il nostro gatto di magazzino continuerà a cercare...'
+    'Our warehouse cat will keep searching...': 'Il nostro gatto di magazzino continuerà a cercare...',
+
+    // Create Dialogs
+    'Create Shipment': 'Crea Spedizione',
+    'Create New Shipment': 'Crea Nuova Spedizione',
+    'Shipment Number': 'Numero Spedizione',
+    'Origin': 'Origine',
+    'Destination': 'Destinazione',
+    'Rail Carrier': 'Vettore Ferroviario',
+    'Rail Departure Time': 'Ora Partenza Ferroviaria',
+    'Rail Arrival Time': 'Ora Arrivo Ferroviario',
+    'Last Mile Carrier': 'Vettore Ultimo Miglio',
+    'Delivery Status': 'Stato Consegna',
+    'Estimated Delivery Time': 'Ora Stimata di Consegna',
+    'Weight (kg)': 'Peso (kg)',
+    'Volume (m³)': 'Volume (m³)',
+    'CO₂ Savings (kg)': 'Risparmio CO₂ (kg)',
+    'Select status': 'Seleziona stato',
+    'Pending': 'In Attesa',
+    'In Transit': 'In Transito',
+    'At Hub': 'All\'Hub',
+    'Out for Delivery': 'In Consegna',
+    'Delivered': 'Consegnato',
+    'Delayed': 'Ritardato',
+    'Shipment created successfully!': 'Spedizione creata con successo!',
+    'Failed to create shipment': 'Impossibile creare la spedizione',
+    'Shipment created and data refreshed': 'Spedizione creata e dati aggiornati',
+    'Failed to refresh shipments': 'Impossibile aggiornare le spedizioni',
+
+    'Create Hub': 'Crea Hub',
+    'Create New Hub': 'Crea Nuovo Hub',
+    'Hub Name': 'Nome Hub',
+    'Location': 'Posizione',
+    'Latitude': 'Latitudine',
+    'Longitude': 'Longitudine',
+    'Capacity (TEU)': 'Capacità (TEU)',
+    'Charging Stations': 'Stazioni di Ricarica',
+    'Operating Hours': 'Orari di Operatività',
+    'Low Emission Zone': 'Zona a Basse Emissioni',
+    'Hub created successfully!': 'Hub creato con successo!',
+    'Failed to create hub': 'Impossibile creare l\'hub',
+    'Hub created and data refreshed': 'Hub creato e dati aggiornati',
+    'Failed to refresh hubs': 'Impossibile aggiornare gli hub'
   }
 };
 

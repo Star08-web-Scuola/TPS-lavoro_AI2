@@ -6,11 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Shipment, Hub } from '@/types/database';
-import { MapPin, Truck, Train, Leaf, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
+import { MapPin, Truck, Train, Leaf, Clock, AlertTriangle, RefreshCw, Plus } from 'lucide-react';
 import { useLanguage } from '@/components/language/LanguageContext';
 import { toast } from 'sonner';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+import { CreateShipmentDialog } from './shipments/CreateShipmentDialog';
+import { CreateHubDialog } from './hubs/CreateHubDialog';
 
 const IntermodalDashboard = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -97,6 +99,39 @@ const IntermodalDashboard = () => {
     // The useEffect will trigger a refresh
   };
 
+  const handleShipmentCreated = () => {
+    // Refresh shipments data
+    supabase
+      .from('shipments')
+      .select('*')
+      .order('updated_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error refreshing shipments:', error);
+          toast.error(t('Failed to refresh shipments'));
+        } else {
+          setShipments(data || []);
+          toast.success(t('Shipment created and data refreshed'));
+        }
+      });
+  };
+
+  const handleHubCreated = () => {
+    // Refresh hubs data
+    supabase
+      .from('hubs')
+      .select('*')
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error refreshing hubs:', error);
+          toast.error(t('Failed to refresh hubs'));
+        } else {
+          setHubs(data || []);
+          toast.success(t('Hub created and data refreshed'));
+        }
+      });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered': return 'bg-green-100 text-green-800';
@@ -157,15 +192,17 @@ const IntermodalDashboard = () => {
           <Train className="h-8 w-8" />
           {t('intermodalDashboard')}
         </h1>
-        <Button
-          variant="outline"
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? t('Refreshing...') : t('Refresh Data')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? t('Refreshing...') : t('Refresh Data')}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -271,8 +308,9 @@ const IntermodalDashboard = () => {
 
         <TabsContent value="shipments">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t('shipmentTracking')}</CardTitle>
+              <CreateShipmentDialog onShipmentCreated={handleShipmentCreated} />
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -314,8 +352,9 @@ const IntermodalDashboard = () => {
 
         <TabsContent value="hubs">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t('intermodalHubs')}</CardTitle>
+              <CreateHubDialog onHubCreated={handleHubCreated} />
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
