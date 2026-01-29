@@ -197,7 +197,6 @@ export const CreateShipmentDialog = ({ onShipmentCreated }: CreateShipmentDialog
                 selected={formData.rail_departure_time}
                 onChange={(date) => handleDateChange('rail_departure_time', date)}
                 showTimeSelect
-                dateFormat="Pp"
                 className="w-full"
               />
             </div>
@@ -211,7 +210,6 @@ export const CreateShipmentDialog = ({ onShipmentCreated }: CreateShipmentDialog
                 selected={formData.rail_arrival_time}
                 onChange={(date) => handleDateChange('rail_arrival_time', date)}
                 showTimeSelect
-                dateFormat="Pp"
                 className="w-full"
               />
             </div>
@@ -262,7 +260,6 @@ export const CreateShipmentDialog = ({ onShipmentCreated }: CreateShipmentDialog
                 selected={formData.estimated_delivery_time}
                 onChange={(date) => handleDateChange('estimated_delivery_time', date)}
                 showTimeSelect
-                dateFormat="Pp"
                 className="w-full"
               />
             </div>
